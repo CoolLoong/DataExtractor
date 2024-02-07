@@ -122,12 +122,24 @@ LL_AUTO_TYPE_INSTANCE_HOOK(
 }
 
 // MinecraftCommands
-LL_AUTO_TYPE_INSTANCE_HOOK(BlockHOOK, HookPriority::Normal, Block, "__gen_??1Block@@UEAA@XZ" void) { origin(); }
+LL_AUTO_TYPE_INSTANCE_HOOK(BlockHooK, HookPriority::Normal, Block, "__gen_??1Block@@UEAA@XZ", void) {
+    dumpVtable(this);
+    return origin();
+}
 
 #pragma endregion HOOK
 
 #pragma region TOOL_FUNCTION
 inline bool    isValidPtr(void* p) { return (p >= (void*)0x10000ull) && (p < (void*)0x000F000000000000ull); }
+
+// 将 const char* const* 转换为 vector<string>
+std::vector<std::string> convertToStringVector(const char* const* arr, size_t size) {
+    std::vector<std::string> strings;
+    for (size_t i = 0; i < size; ++i) {
+        strings.push_back(arr[i]);
+    }
+    return strings;
+}
 
 std::vector<std::pair<void*, std::vector<std::string>>> dumpVtable(void* obj) {
     auto                                                    vtab  = *(uintptr_t**)obj;
@@ -136,10 +148,11 @@ std::vector<std::pair<void*, std::vector<std::string>>> dumpVtable(void* obj) {
     for (;; count++) {
         if (isValidPtr((void*)vtab[count])) {
             size_t*     address = 0;
-            auto        result = pl::symbol_provider::pl_lookup_symbol((void*)vtab[count], address);
-            std::string str    = *result;
+            auto        result  = pl::symbol_provider::pl_lookup_symbol((void*)vtab[count], address);
+            std::string str     = *result;
             if (*address != 0) {
-                res.push_back({(void*)vtab[count], str});
+                const auto& array = convertToStringVector(result, *address);
+                res.push_back({(void*)vtab[count], array});
             }
         } else {
             break;
@@ -147,7 +160,6 @@ std::vector<std::pair<void*, std::vector<std::string>>> dumpVtable(void* obj) {
     }
     return res;
 }
-
 
 bool folderExists(const std::string& folderName) {
     struct stat info {};

@@ -88,3 +88,4 @@ void dumpPropertyTypeData(const ll::Logger& logger);
 
 void extractBlock(ListTag& dest, const Block& block, const ll::Logger& logger);
 void extractData();
+std::vector<std::pair<void*, std::vector<std::string>>> dumpVtable(void* obj);
