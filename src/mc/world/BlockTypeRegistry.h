@@ -1,14 +1,14 @@
 #pragma once
 
-#include "mc/_HeaderOutputPredefine.h"
-#include "mc/common/HashedString.h"
 #include "mc/common/BaseGameVersion.h"
+#include "mc/common/HashedString.h"
+#include "mc/_HeaderOutputPredefine.h"
 
 // auto generated inclusion list
-#include "mc/common/OwnerPtrT.h"
-#include "mc/common/SharedPtr.h"
-#include "mc/common/StackRefResultT.h"
-#include "mc/common/WeakPtr.h"
+#include "mc/enums/OwnerPtrT.h"
+#include "mc/enums/SharedPtr.h"
+#include "mc/enums/StackRefResultT.h"
+#include "mc/enums/WeakPtr.h"
 
 class BlockTypeRegistry {
 public:

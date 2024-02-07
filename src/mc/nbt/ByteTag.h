@@ -9,16 +9,25 @@ class ByteTag : public ::Tag {
 public:
     schar data;
 
-    ByteTag& operator=(schar value) {
-        data = value;
+    template <std::integral T>
+    constexpr ByteTag& operator=(T value) {
+        data = (schar)value;
         return *this;
     }
 
-    operator schar() const { return data; }
+    template <std::integral T>
+    [[nodiscard]] constexpr operator T() const {
+        return (T)data;
+    }
 
-    operator bool() const { return data != 0; }
+    [[nodiscard]] constexpr operator std::byte() const { return (std::byte)data; } // NOLINT
 
-    explicit ByteTag(int value) : data((schar)value) {}
+    template <std::integral T>
+    [[nodiscard]] constexpr explicit ByteTag(T value = 0) : data((schar)value) {}
+
+    [[nodiscard]] constexpr explicit ByteTag(std::byte b) : data(std::to_integer<schar>(b)) {}
+
+    [[nodiscard]] ByteTag operator-() const { return ByteTag{(schar)-data}; }
 
 public:
     // NOLINTBEGIN
@@ -26,10 +35,10 @@ public:
     virtual ~ByteTag();
 
     // vIndex: 2, symbol: ?write@ByteTag@@UEBAXAEAVIDataOutput@@@Z
-    virtual void write(class IDataOutput&) const;
+    virtual void write(class IDataOutput& dos) const;
 
     // vIndex: 3, symbol: ?load@ByteTag@@UEAAXAEAVIDataInput@@@Z
-    virtual void load(class IDataInput&);
+    virtual void load(class IDataInput& dis);
 
     // vIndex: 4, symbol: ?toString@ByteTag@@UEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     virtual std::string toString() const;
@@ -38,7 +47,7 @@ public:
     virtual ::Tag::Type getId() const;
 
     // vIndex: 6, symbol: ?equals@ByteTag@@UEBA_NAEBVTag@@@Z
-    virtual bool equals(class Tag const&) const;
+    virtual bool equals(class Tag const& rhs) const;
 
     // vIndex: 9, symbol: ?copy@ByteTag@@UEBA?AV?$unique_ptr@VTag@@U?$default_delete@VTag@@@std@@@std@@XZ
     virtual std::unique_ptr<class Tag> copy() const;
@@ -46,14 +55,8 @@ public:
     // vIndex: 10, symbol: ?hash@ByteTag@@UEBA_KXZ
     virtual uint64 hash() const;
 
-    // symbol: ??0ByteTag@@QEAA@XZ
-    MCAPI ByteTag();
-
-    // symbol: ??0ByteTag@@QEAA@E@Z
-    MCAPI explicit ByteTag(uchar);
-
     // NOLINTEND
 };
 namespace ll::nbt_literals {
-[[nodiscard]] inline ByteTag operator""_b(uint64 num) { return ByteTag{(uchar)num}; }
+[[nodiscard]] inline ByteTag operator""_b(uint64 num) { return ByteTag{(schar)num}; }
 } // namespace ll::nbt_literals

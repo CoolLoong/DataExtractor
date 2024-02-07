@@ -3,7 +3,7 @@
 #include "mc/_HeaderOutputPredefine.h"
 
 // auto generated inclusion list
-#include "mc/common/Compressibility.h"
+#include "mc/enums/Compressibility.h"
 
 class NetworkPeer {
 public:

@@ -1,32 +1,33 @@
 #pragma once
 
 #include <string>
-#include <string_view>
 #include <vector>
 
 #include "ll/base/Macro.h"
 #include "ll/base/StdInt.h"
-#include "ll/memory/Memory.h"
 
 #include "fmt/color.h"
-#include "fmt/core.h"
 
-namespace ll::utils::string_utils {
+namespace ll::inline utils::string_utils {
 
 // "2021-03-24"  ->  ["2021", "03", "24"]  (use '-' as split pattern)
-[[nodiscard]] constexpr std::vector<std::string_view>
-splitByPattern(std::string_view s, std::string_view pattern, bool keepEmpty = false) {
-    if (s.empty()) return {};
+template <class T>
+[[nodiscard]] constexpr auto splitByPattern(T&& str, std::string_view pattern, bool keepEmpty = false)
+    -> decltype(auto) {
+    using ReturnTypeElement = std::conditional_t<std::is_same_v<T&&, std::string&&>, std::string, std::string_view>;
+    using ReturnType        = std::vector<ReturnTypeElement>;
+    std::string_view s{str};
+    if (s.empty()) return ReturnType{};
     size_t pos  = s.find(pattern);
     size_t size = s.size();
 
-    std::vector<std::string_view> ret;
+    ReturnType ret;
     while (pos != std::string::npos) {
-        if (keepEmpty || pos != 0) ret.push_back(s.substr(0, pos));
+        if (keepEmpty || pos != 0) ret.push_back(ReturnTypeElement{s.substr(0, pos)});
         s   = s.substr(pos + pattern.size(), size - pos - pattern.size());
         pos = s.find(pattern);
     }
-    if (keepEmpty || !s.empty()) ret.push_back(s);
+    if (keepEmpty || !s.empty()) ret.push_back(ReturnTypeElement{s});
     return ret;
 }
 
@@ -52,6 +53,16 @@ replaceAll(std::string const& str, std::string_view oldValue, std::string_view n
     return ret;
 }
 
+constexpr bool
+replaceContent(std::string& str, std::string_view before, std::string_view after, std::string_view relplaceWith) {
+    auto startOffset = str.find(before);
+    if (startOffset == std::string::npos) return false;
+    startOffset    += before.size();
+    auto endOffset  = after.empty() ? std::string::npos : str.find(after, startOffset);
+    str.replace(startOffset, endOffset - startOffset, relplaceWith);
+    return true;
+}
+
 /**
  * @brief Integer to hex string.
  *
@@ -68,7 +79,7 @@ replaceAll(std::string const& str, std::string_view oldValue, std::string_view n
  * IntToHexStr(16, true, true, false); // "0000000F"
  * @endcode
  */
-template <typename T>
+template <class T>
     requires std::is_integral_v<T>
 [[nodiscard]] constexpr std::string
 intToHexStr(T value, bool upperCase = true, bool no0x = true, bool noLeadingZero = true) {
@@ -132,11 +143,15 @@ LLNDAPI bool isu8str(std::string_view str) noexcept;
 
 LLNDAPI std::string tou8str(std::string_view str);
 
+LLNDAPI std::string toSnakeCase(std::string_view str);
+
 namespace CodePage {
 enum : uint {
-    UTF16 = 0,
-    ANSI  = 936,
-    UTF8  = 65001,
+    DefaultACP = 0,  // default to ANSI code page
+    ThreadACP  = 3,  // current thread's ANSI code page
+    Symbol     = 42, // SYMBOL translations
+    GB2312     = 936,
+    UTF8       = 65001,
 };
 } // namespace CodePage
 
@@ -144,7 +159,8 @@ LLNDAPI std::wstring str2wstr(std::string_view str, uint codePage = CodePage::UT
 
 LLNDAPI std::string wstr2str(std::wstring_view str, uint codePage = CodePage::UTF8);
 
-LLNDAPI std::string str2str(std::string_view str, uint fromCodePage = CodePage::ANSI, uint toCodePage = CodePage::UTF8);
+LLNDAPI std::string
+        str2str(std::string_view str, uint fromCodePage = CodePage::DefaultACP, uint toCodePage = CodePage::UTF8);
 
 [[nodiscard]] inline std::string u8str2str(std::u8string str) {
     std::string& tmp = *reinterpret_cast<std::string*>(&str);
@@ -174,25 +190,37 @@ LLNDAPI std::string str2str(std::string_view str, uint fromCodePage = CodePage::
 template <class T, auto f>
 [[nodiscard]] inline T svtonum(std::string_view str, size_t* idx, int base) {
     int&        errnoRef = errno;
-    const char* ptr      = str.data();
-    char*       eptr;
+    char const* ptr      = str.data();
+    char*       eptr{};
     errnoRef       = 0;
     const auto ans = f(ptr, &eptr, base);
-    if (ptr == eptr) { throw std::invalid_argument("invalid svtonum argument"); }
-    if (errnoRef == ERANGE) { throw std::out_of_range("svtonum argument out of range"); }
-    if (idx) { *idx = static_cast<size_t>(eptr - ptr); }
+    if (ptr == eptr) {
+        throw std::invalid_argument("invalid svtonum argument");
+    }
+    if (errnoRef == ERANGE) {
+        throw std::out_of_range("svtonum argument out of range");
+    }
+    if (idx) {
+        *idx = static_cast<size_t>(eptr - ptr);
+    }
     return static_cast<T>(ans);
 }
 template <class T, auto f>
 [[nodiscard]] inline T svtonum(std::string_view str, size_t* idx) {
     int&        errnoRef = errno;
-    const char* ptr      = str.data();
-    char*       eptr;
+    char const* ptr      = str.data();
+    char*       eptr{};
     errnoRef       = 0;
     const auto ans = f(ptr, &eptr);
-    if (ptr == eptr) { throw std::invalid_argument("invalid svtonum argument"); }
-    if (errnoRef == ERANGE) { throw std::out_of_range("svtonum argument out of range"); }
-    if (idx) { *idx = static_cast<size_t>(eptr - ptr); }
+    if (ptr == eptr) {
+        throw std::invalid_argument("invalid svtonum argument");
+    }
+    if (errnoRef == ERANGE) {
+        throw std::out_of_range("svtonum argument out of range");
+    }
+    if (idx) {
+        *idx = static_cast<size_t>(eptr - ptr);
+    }
     return static_cast<T>(ans);
 }
 
@@ -235,4 +263,6 @@ template <class T, auto f>
 [[nodiscard]] inline ldouble svtold(std::string_view str, size_t* idx = nullptr) {
     return svtonum<ldouble, strtof>(str, idx);
 }
-} // namespace ll::utils::string_utils
+LLNDAPI bool strtobool(std::string const&);
+
+} // namespace ll::inline utils::string_utils

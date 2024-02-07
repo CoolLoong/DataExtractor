@@ -1,10 +1,10 @@
 #pragma once
 
+#include "common/HashedString.h"
 #include "mc/_HeaderOutputPredefine.h"
-#include "mc/common/HashedString.h"
 
 // auto generated inclusion list
-#include "mc/common/ActorType.h"
+#include "enums/ActorType.h"
 
 struct ActorDefinitionIdentifier {
 public:

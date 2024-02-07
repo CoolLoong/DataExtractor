@@ -1,20 +1,22 @@
 #pragma once
+
 #include "mc/math/vector/component/base/VectorBase.h"
 
+namespace ll::math {
 struct CommutativeGroupTag {};
 
 template <typename T>
 concept IsCommutativeGroup = std::is_base_of_v<CommutativeGroupTag, T>;
 
 template <typename T, typename... Components>
-class LL_EBO CommutativeGroup : public VectorBase<T, Components...>, CommutativeGroupTag {
+struct LL_EBO CommutativeGroup : VectorBase<T, Components...>, CommutativeGroupTag {
 public:
     using first_type = typename VectorBase<T, Components...>::first_type;
 
     constexpr T& operator+=(T const& b) noexcept
         requires(!IsCommutativeGroup<first_type>)
     {
-        ll::meta::unrollWithArgs<Components...>([&]<typename axis_type>(size_t iter) constexpr {
+        CommutativeGroup::forEachComponent([&]<typename axis_type>(size_t iter) constexpr {
             static_cast<T*>(this)->template get<axis_type>(iter) += b.template get<axis_type>(iter);
         });
         return static_cast<T&>(*(static_cast<T*>(this)));
@@ -23,7 +25,7 @@ public:
     constexpr T& operator-=(T const& b) noexcept
         requires(!IsCommutativeGroup<first_type>)
     {
-        ll::meta::unrollWithArgs<Components...>([&]<typename axis_type>(size_t iter) constexpr {
+        CommutativeGroup::forEachComponent([&]<typename axis_type>(size_t iter) constexpr {
             static_cast<T*>(this)->template get<axis_type>(iter) -= b.template get<axis_type>(iter);
         });
         return static_cast<T&>(*(static_cast<T*>(this)));
@@ -46,7 +48,7 @@ public:
     }
     template <std::convertible_to<first_type> V>
     constexpr T& operator+=(V const& b) noexcept {
-        ll::meta::unrollWithArgs<Components...>([&]<typename axis_type>(size_t iter) constexpr {
+        CommutativeGroup::forEachComponent([&]<typename axis_type>(size_t iter) constexpr {
             static_cast<T*>(this)->template get<first_type>(iter) += static_cast<first_type>(b);
         });
         return static_cast<T&>(*(static_cast<T*>(this)));
@@ -55,7 +57,7 @@ public:
 
     template <std::convertible_to<first_type> V>
     constexpr T& operator-=(V const& b) noexcept {
-        ll::meta::unrollWithArgs<Components...>([&]<typename axis_type>(size_t iter) constexpr {
+        CommutativeGroup::forEachComponent([&]<typename axis_type>(size_t iter) constexpr {
             static_cast<T*>(this)->template get<first_type>(iter) -= static_cast<first_type>(b);
         });
         return static_cast<T&>(*(static_cast<T*>(this)));
@@ -104,7 +106,7 @@ template <IsCommutativeGroup T>
     T::forEachComponent([&]<typename axis_type>(size_t iter) constexpr {
         if constexpr (std::is_base_of_v<CommutativeGroupTag, axis_type>) {
             tmp.template get<axis_type>(iter) =
-                ::min<axis_type>(a.template get<axis_type>(iter), b.template get<axis_type>(iter));
+                min<axis_type>(a.template get<axis_type>(iter), b.template get<axis_type>(iter));
         } else {
             tmp.template get<axis_type>(iter) =
                 std::min<axis_type>(a.template get<axis_type>(iter), b.template get<axis_type>(iter));
@@ -119,7 +121,7 @@ template <IsCommutativeGroup T>
     T::forEachComponent([&]<typename axis_type>(size_t iter) constexpr {
         if constexpr (std::is_base_of_v<CommutativeGroupTag, axis_type>) {
             tmp.template get<axis_type>(iter) =
-                ::max<axis_type>(a.template get<axis_type>(iter), b.template get<axis_type>(iter));
+                max<axis_type>(a.template get<axis_type>(iter), b.template get<axis_type>(iter));
         } else {
             tmp.template get<axis_type>(iter) =
                 std::max<axis_type>(a.template get<axis_type>(iter), b.template get<axis_type>(iter));
@@ -127,3 +129,4 @@ template <IsCommutativeGroup T>
     });
     return tmp;
 }
+} // namespace ll::math

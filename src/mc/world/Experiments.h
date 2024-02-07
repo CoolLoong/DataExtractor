@@ -3,7 +3,7 @@
 #include "mc/_HeaderOutputPredefine.h"
 
 // auto generated inclusion list
-#include "mc/common/AllExperiments.h"
+#include "mc/enums/AllExperiments.h"
 
 class Experiments {
 public:

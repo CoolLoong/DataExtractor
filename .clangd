@@ -1,0 +1,18 @@
+Diagnostics:
+  UnusedIncludes: Strict
+  MissingIncludes: Strict
+  Suppress:
+    - "-Wmicrosoft-enum-forward-reference"
+    - "-Wc++11-narrowing"
+    - "-Wc++2b-extensions"
+    - "-Wmicrosoft-cast"
+CompileFlags:
+  Add:
+    - "-ferror-limit=0"
+    - '-D__FUNCTION__="dummy"'
+    - '-D__clangd__'
+    - "-Yusrc/ll/Global.h"
+    - "-FIsrc/ll/Global.h" # clangd bug can't find pch file
+  Remove:
+    - "/YuGlobal.h"
+    - "/FIGlobal.h"

@@ -9,14 +9,21 @@ class ShortTag : public ::Tag {
 public:
     short data;
 
-    ShortTag& operator=(short value) {
-        data = value;
+    template <std::integral T>
+    constexpr ShortTag& operator=(T value) {
+        data = (short)value;
         return *this;
     }
 
-    operator short() const { return data; }
+    template <std::integral T>
+    [[nodiscard]] constexpr operator T() const {
+        return (T)data;
+    }
 
-    explicit ShortTag(short value) : data(value) {}
+    template <std::integral T>
+    [[nodiscard]] constexpr explicit ShortTag(T value = 0) : data((short)value) {}
+
+    [[nodiscard]] ShortTag operator-() const { return ShortTag{(short)-data}; }
 
 public:
     // NOLINTBEGIN
@@ -24,10 +31,10 @@ public:
     virtual ~ShortTag() = default;
 
     // vIndex: 2, symbol: ?write@ShortTag@@UEBAXAEAVIDataOutput@@@Z
-    virtual void write(class IDataOutput&) const;
+    virtual void write(class IDataOutput& dos) const;
 
     // vIndex: 3, symbol: ?load@ShortTag@@UEAAXAEAVIDataInput@@@Z
-    virtual void load(class IDataInput&);
+    virtual void load(class IDataInput& dis);
 
     // vIndex: 4, symbol: ?toString@ShortTag@@UEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     virtual std::string toString() const;
@@ -36,7 +43,7 @@ public:
     virtual ::Tag::Type getId() const;
 
     // vIndex: 6, symbol: ?equals@ShortTag@@UEBA_NAEBVTag@@@Z
-    virtual bool equals(class Tag const&) const;
+    virtual bool equals(class Tag const& rhs) const;
 
     // vIndex: 9, symbol: ?copy@ShortTag@@UEBA?AV?$unique_ptr@VTag@@U?$default_delete@VTag@@@std@@@std@@XZ
     virtual std::unique_ptr<class Tag> copy() const;

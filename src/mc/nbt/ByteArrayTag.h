@@ -10,18 +10,24 @@ class ByteArrayTag : public ::Tag {
 public:
     TagMemoryChunk data{};
 
-    ByteArrayTag& operator=(TagMemoryChunk const& value) {
-        data = value;
-        return *this;
-    }
-
-    operator TagMemoryChunk() const { return data; }
+    [[nodiscard]] _CONSTEXPR23 operator TagMemoryChunk const&() const { return data; } // NOLINT
+    [[nodiscard]] _CONSTEXPR23 operator TagMemoryChunk&() { return data; }             // NOLINT
 
     ByteArrayTag() = default;
 
-    ByteArrayTag(std::vector<schar> const& arr) : data(std::span{arr}) {}
+    template <class T>
+        requires(std::is_trivially_destructible_v<T>)
+    [[nodiscard]] _CONSTEXPR23 ByteArrayTag(std::in_place_type_t<T>, TagMemoryChunk mem) : data(std::move(mem)) {
+        data.mSize = data.mSize * sizeof(T);
+    }
+
+    [[nodiscard]] _CONSTEXPR23 ByteArrayTag(std::vector<schar> const& arr) : data(std::span{arr}) {} // NOLINT
 
     std::span<schar> view() const { return std::span<schar>((schar*)data.mBuffer.get(), data.mSize); }
+
+    [[nodiscard]] _CONSTEXPR23 schar& operator[](size_t index) const { return view()[index]; }
+
+    [[nodiscard]] _CONSTEXPR23 size_t size() const { return data.mSize; }
 
 public:
     // NOLINTBEGIN
@@ -29,10 +35,10 @@ public:
     virtual ~ByteArrayTag() = default;
 
     // vIndex: 2, symbol: ?write@ByteArrayTag@@UEBAXAEAVIDataOutput@@@Z
-    virtual void write(class IDataOutput&) const;
+    virtual void write(class IDataOutput& dos) const;
 
     // vIndex: 3, symbol: ?load@ByteArrayTag@@UEAAXAEAVIDataInput@@@Z
-    virtual void load(class IDataInput&);
+    virtual void load(class IDataInput& dis);
 
     // vIndex: 4, symbol: ?toString@ByteArrayTag@@UEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     virtual std::string toString() const;
@@ -41,7 +47,7 @@ public:
     virtual ::Tag::Type getId() const;
 
     // vIndex: 6, symbol: ?equals@ByteArrayTag@@UEBA_NAEBVTag@@@Z
-    virtual bool equals(class Tag const&) const;
+    virtual bool equals(class Tag const& rhs) const;
 
     // vIndex: 9, symbol: ?copy@ByteArrayTag@@UEBA?AV?$unique_ptr@VTag@@U?$default_delete@VTag@@@std@@@std@@XZ
     virtual std::unique_ptr<class Tag> copy() const;

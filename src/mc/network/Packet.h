@@ -1,13 +1,13 @@
 #pragma once
 
+#include "mc/common/Result.h"
 #include "mc/_HeaderOutputPredefine.h"
-#include "mc/common/Compressibility.h"
+#include "mc/enums/Compressibility.h"
+#include "mc/enums/MinecraftPacketIds.h"
+#include "mc/enums/PacketPriority.h"
+#include "mc/enums/SubClientId.h"
 #include "mc/network/IPacketHandlerDispatcher.h"
 #include "mc/network/NetworkPeer.h"
-#include "mc/common/PacketPriority.h"
-#include "mc/common/Result.h"
-#include "mc/common/MinecraftPacketIds.h"
-#include "mc/common/SubClientId.h"
 
 class BinaryStream;
 class ReadOnlyBinaryStream;

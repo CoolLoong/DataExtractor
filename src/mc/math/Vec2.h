@@ -2,7 +2,7 @@
 
 #include "mc/_HeaderOutputPredefine.h"
 
-class Vec2 : public floatN2<Vec2> {
+class Vec2 : public ll::math::floatN2<Vec2> {
 public:
     using floatN2::floatN2;
 
@@ -12,7 +12,7 @@ public:
     MCAPI class Vec2 normalized() const;
 
     // symbol: ?rotate@Vec2@@SA?AV1@AEBV1@M@Z
-    MCAPI static class Vec2 rotate(class Vec2 const&, float);
+    MCAPI static class Vec2 rotate(class Vec2 const& v, float);
 
     // symbol: ?LOWEST@Vec2@@2V1@B
     MCAPI static class Vec2 const LOWEST;

@@ -9,12 +9,20 @@ class StringTag : public ::Tag {
 public:
     std::string data;
 
-    StringTag& operator=(std::string const& value) {
-        data = value;
-        return *this;
-    }
+    [[nodiscard]] constexpr StringTag() = default;
 
-    operator std::string() const { return data; }
+    [[nodiscard]] constexpr StringTag(std::string str) : data(std::move(str)) {} // NOLINT
+    [[nodiscard]] constexpr StringTag(std::string_view str) : data(str) {}       // NOLINT
+    template <size_t N>
+    [[nodiscard]] constexpr StringTag(char const (&str)[N]) : StringTag(std::string_view{str, N - 1}) {} // NOLINT
+
+    [[nodiscard]] constexpr operator std::string const&() const { return data; } // NOLINT
+
+    [[nodiscard]] constexpr operator std::string_view() const { return data; } // NOLINT
+
+    [[nodiscard]] constexpr operator std::string&() { return data; } // NOLINT
+
+    [[nodiscard]] constexpr operator std::string&&() && { return std::move(data); } // NOLINT
 
 public:
     // NOLINTBEGIN
@@ -22,10 +30,10 @@ public:
     virtual ~StringTag();
 
     // vIndex: 2, symbol: ?write@StringTag@@UEBAXAEAVIDataOutput@@@Z
-    virtual void write(class IDataOutput&) const;
+    virtual void write(class IDataOutput& dos) const;
 
     // vIndex: 3, symbol: ?load@StringTag@@UEAAXAEAVIDataInput@@@Z
-    virtual void load(class IDataInput&);
+    virtual void load(class IDataInput& dis);
 
     // vIndex: 4, symbol: ?toString@StringTag@@UEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     virtual std::string toString() const;
@@ -34,19 +42,13 @@ public:
     virtual ::Tag::Type getId() const;
 
     // vIndex: 6, symbol: ?equals@StringTag@@UEBA_NAEBVTag@@@Z
-    virtual bool equals(class Tag const&) const;
+    virtual bool equals(class Tag const& rhs) const;
 
     // vIndex: 9, symbol: ?copy@StringTag@@UEBA?AV?$unique_ptr@VTag@@U?$default_delete@VTag@@@std@@@std@@XZ
     virtual std::unique_ptr<class Tag> copy() const;
 
     // vIndex: 10, symbol: ?hash@StringTag@@UEBA_KXZ
     virtual uint64 hash() const;
-
-    // symbol: ??0StringTag@@QEAA@XZ
-    MCAPI StringTag();
-
-    // symbol: ??0StringTag@@QEAA@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
-    MCAPI explicit StringTag(std::string);
 
     // NOLINTEND
 };

@@ -1,0 +1,50 @@
+#pragma once
+
+#include "mc/_HeaderOutputPredefine.h"
+
+// auto generated inclusion list
+#include "mc/commands/ActorServerCommandOrigin.h"
+#include "mc/commands/CommandOriginType.h"
+#include "mc/commands/CommandPermissionLevel.h"
+#include "mc/enums/AbilitiesIndex.h"
+#include "mc/enums/SubClientId.h"
+
+// auto generated forward declare list
+// clang-format off
+namespace Json { class Value; }
+namespace mce { class UUID; }
+// clang-format on
+
+class GameDirectorEntityServerCommandOrigin : public ::ActorServerCommandOrigin {
+public:
+    // prevent constructor by default
+    GameDirectorEntityServerCommandOrigin& operator=(GameDirectorEntityServerCommandOrigin const&);
+    GameDirectorEntityServerCommandOrigin(GameDirectorEntityServerCommandOrigin const&);
+    GameDirectorEntityServerCommandOrigin();
+
+public:
+    // NOLINTBEGIN
+    // vIndex: 0, symbol: __gen_??1GameDirectorEntityServerCommandOrigin@@UEAA@XZ
+    virtual ~GameDirectorEntityServerCommandOrigin() = default;
+
+    // vIndex: 9, symbol: ?getPermissionsLevel@GameDirectorEntityServerCommandOrigin@@UEBA?AW4CommandPermissionLevel@@XZ
+    virtual ::CommandPermissionLevel getPermissionsLevel() const;
+
+    // vIndex: 10, symbol:
+    // ?clone@GameDirectorEntityServerCommandOrigin@@UEBA?AV?$unique_ptr@VCommandOrigin@@U?$default_delete@VCommandOrigin@@@std@@@std@@XZ
+    virtual std::unique_ptr<class CommandOrigin> clone() const;
+
+    // vIndex: 17, symbol: ?canUseCommandsWithoutCheatsEnabled@GameDirectorEntityServerCommandOrigin@@UEBA_NXZ
+    virtual bool canUseCommandsWithoutCheatsEnabled() const;
+
+    // vIndex: 18, symbol: ?isSelectorExpansionAllowed@GameDirectorEntityServerCommandOrigin@@UEBA_NXZ
+    virtual bool isSelectorExpansionAllowed() const;
+
+    // vIndex: 23, symbol: ?getOriginType@GameDirectorEntityServerCommandOrigin@@UEBA?AW4CommandOriginType@@XZ
+    virtual ::CommandOriginType getOriginType() const;
+
+    // symbol: ??0GameDirectorEntityServerCommandOrigin@@QEAA@AEAVActor@@@Z
+    MCAPI explicit GameDirectorEntityServerCommandOrigin(class Actor& origin);
+
+    // NOLINTEND
+};

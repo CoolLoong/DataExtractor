@@ -2,21 +2,21 @@
 
 #include "mc/_HeaderOutputPredefine.h"
 
-class Vec3 : public floatN3<Vec3> {
+class Vec3 : public ll::math::floatN3<Vec3> {
 public:
     using floatN3::floatN3;
     // NOLINTBEGIN
     // symbol: ?distanceToLineSquared@Vec3@@QEBAMAEBV1@0@Z
-    MCAPI float distanceToLineSquared(class Vec3 const&, class Vec3 const&) const;
+    MCAPI float distanceToLineSquared(class Vec3 const& p0, class Vec3 const& p1) const;
 
     // symbol: ?floor@Vec3@@QEBA?AV1@M@Z
-    MCAPI class Vec3 floor(float) const;
+    MCAPI class Vec3 floor(float offset) const;
 
     // symbol: ?isNan@Vec3@@QEBA_NXZ
     MCAPI bool isNan() const;
 
     // symbol: ?isNear@Vec3@@QEBA_NAEBV1@M@Z
-    MCAPI bool isNear(class Vec3 const&, float) const;
+    MCAPI bool isNear(class Vec3 const& rhs, float e) const;
 
     // symbol: ?maxComponent@Vec3@@QEBAMXZ
     MCAPI float maxComponent() const;
@@ -28,16 +28,16 @@ public:
     MCAPI class Vec3 xz() const;
 
     // symbol: ?directionFromRotation@Vec3@@SA?AV1@AEBVVec2@@@Z
-    MCAPI static class Vec3 directionFromRotation(class Vec2 const&);
+    MCAPI static class Vec3 directionFromRotation(class Vec2 const& rot);
 
     // symbol: ?directionFromRotation@Vec3@@SA?AV1@MM@Z
-    MCAPI static class Vec3 directionFromRotation(float, float);
+    MCAPI static class Vec3 directionFromRotation(float rotX, float rotY);
 
     // symbol: ?fromXZ@Vec3@@SA?AV1@AEBVVec2@@M@Z
-    MCAPI static class Vec3 fromXZ(class Vec2 const&, float);
+    MCAPI static class Vec3 fromXZ(class Vec2 const&, float y);
 
     // symbol: ?rotationFromDirection@Vec3@@SA?AVVec2@@AEBV1@@Z
-    MCAPI static class Vec2 rotationFromDirection(class Vec3 const&);
+    MCAPI static class Vec2 rotationFromDirection(class Vec3 const& dir);
 
     // symbol: ?HALF@Vec3@@2V1@B
     MCAPI static class Vec3 const HALF;

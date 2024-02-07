@@ -3,8 +3,8 @@
 #include "mc/_HeaderOutputPredefine.h"
 
 // auto generated inclusion list
-#include "mc/common/ItemColor.h"
-#include "mc/common/BlockColor.h"
+#include "mc/enums/BlockColor.h"
+#include "mc/enums/ItemColor.h"
 
 // auto generated forward declare list
 // clang-format off

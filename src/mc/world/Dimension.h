@@ -13,7 +13,4 @@ public:
 
     // symbol: ?getBlockSourceFromMainChunkSource@Dimension@@QEBAAEAVBlockSource@@XZ
     MCAPI class BlockSource& getBlockSourceFromMainChunkSource() const;
-
-    // vIndex: 5, symbol: ?init@Dimension@@UEAAXXZ
-    virtual void init();
 };

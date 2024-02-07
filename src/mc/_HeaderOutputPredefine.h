@@ -97,10 +97,8 @@
 #include "ll/base/StdInt.h"
 #include "ll/memory/Memory.h"
 
-#include "mc/common/optional_ref.h" // replace optional<reference_wrapper<>>
+#include "mc/enums/optional_ref.h" // replace optional<reference_wrapper<>>
 #include "mc/math/vector/Vecs.h"            // for vector types
-
-using FacingID = uchar;
 
 // clang-format off
 template <typename T0, typename T1>

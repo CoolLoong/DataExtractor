@@ -15,26 +15,24 @@ option("localbdslibrary")
 option_end()
 
 add_requires("localbdslibrary")
-
--- xmake-repo
-add_requires("entt v3.12.2")
-add_requires("gsl v4.0.0")
-add_requires("leveldb 1.23")
-add_requires("rapidjson v1.1.0")
-add_requires("zlib-ng 2.1.3")
-
--- ^^^ for mc / for ll vvv
+-- Dependencies from xmake-repo.
+add_requires("entt 3.12.2")
+add_requires("expected-lite v0.6.3")
 add_requires("fmt 10.1.1")
-add_requires("magic_enum v0.9.0")
-add_requires("nlohmann_json v3.11.2")
-add_requires("gtest 1.12.1")
+add_requires("gsl 4.0.0")
+add_requires("leveldb 1.23")
+add_requires("magic_enum 0.9.0")
+add_requires("nlohmann_json 3.11.2")
+add_requires("rapidjson 1.1.0")
 
--- liteldev-repo
-add_requires("pcg_cpp v1.0.0")
-add_requires("preloader v1.3.0")
-add_requires("symbolprovider v1.1.0")
+-- Dependencies from liteldev-repo.
 add_requires("ctre 3.8.1")
+add_requires("pcg_cpp 1.0.0")
 add_requires("pfr 2.1.1")
+add_requires("demangler v17.0.7")
+add_requires("preloader 1.5.0")
+add_requires("symbolprovider 1.1.0")
+add_requires("zlib-ng 2.1.3")
 
 
 target("DataExtractor")
@@ -46,19 +44,68 @@ target("DataExtractor")
     set_pcxxheader("src/mc/_HeaderOutputPredefine.h")
     add_headerfiles("src/(**.h)", "src/(**.hpp)")
     add_includedirs("./src")
-    add_cxflags("/utf-8", "/permissive-", "/EHa", "/W4")
-    add_defines(
-        "UNICODE", "LITELOADER_EXPORTS", "WIN32_LEAN_AND_MEAN",
-        "CPPHTTPLIB_OPENSSL_SUPPORT", "_AMD64_", "NOMINMAX",
-        "_CRT_SECURE_NO_WARNINGS"
-    )
-    add_shflags("/DELAYLOAD:bedrock_server.dll")
     add_files("src/**.cpp")
-    -- xmake-repo
-    add_packages("entt", "fmt", "gsl", "gtest", "leveldb", "magic_enum", "nlohmann_json", "rapidjson","zlib-ng")
-    -- liteldev-repo
-    add_packages("pcg_cpp", "preloader", "symbolprovider", "ctre", "pfr")
-    add_packages("localbdslibrary")
+    add_cxflags(
+        "/utf-8",
+        "/permissive-",
+        "/EHa",
+        "/W4",
+        "/w44265",
+        "/w44289",
+        "/w44296",
+        "/w45263",
+        "/w44738",
+        "/w45204"
+    )
+    add_cxflags(
+        "/EHs",
+        "-Wno-microsoft-cast",
+        "-Wno-invalid-offsetof",
+        "-Wno-c++2b-extensions",
+        "-Wno-microsoft-include",
+        "-Wno-overloaded-virtual",
+        "-Wno-ignored-qualifiers",
+        "-Wno-potentially-evaluated-expression",
+        "-Wno-pragma-system-header-outside-header",
+        {tools = {"clang_cl"}}
+    )
+    add_defines(
+        "_AMD64_",
+        "_CRT_SECURE_NO_WARNINGS",
+        "_ENABLE_CONSTEXPR_MUTEX_CONSTRUCTOR",
+        "NOMINMAX",
+        "UNICODE",
+        "WIN32_LEAN_AND_MEAN",
+        "ENTT_PACKED_PAGE=128",
+        { public = true }
+    )
+    add_defines(
+        "LL_EXPORT",
+        "_HAS_CXX23=1" -- work around
+    )
+    add_shflags(
+        "/DELAYLOAD:bedrock_server.dll",
+        { public = true }
+    )
+    add_packages(
+        "entt",
+        "expected-lite",
+        "fmt",
+        "gsl",
+        "leveldb",
+        "magic_enum",
+        "nlohmann_json",
+        "rapidjson",
+        "ctre",
+        "pcg_cpp",
+        "pfr",
+        "demangler",
+        "preloader",
+        "symbolprovider",
+        "zlib-ng",
+        "localbdslibrary",
+        { public = true }
+    )
 
 task("bds-lib")
     on_run(function ()
@@ -98,7 +145,7 @@ task("bds-lib")
             import("core.project.config")
             import("net.http")
 
-            local pe_editor_version = "v3.3.0"
+            local pe_editor_version = "v3.5.1"
             local lib_path = path.join(config.buildir(), "bds", "lib")
             local bedrock_server_api = path.join(lib_path, "bedrock_server_api.lib")
             local bedrock_server_var = path.join(lib_path, "bedrock_server_var.lib")

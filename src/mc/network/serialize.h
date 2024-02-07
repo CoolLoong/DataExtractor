@@ -1,7 +1,7 @@
 #pragma once
 
-#include "mc/_HeaderOutputPredefine.h"
 #include "mc/common/Result.h"
+#include "mc/_HeaderOutputPredefine.h"
 
 template <typename T>
 struct serialize {

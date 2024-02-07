@@ -3,7 +3,7 @@
 #include "mc/_HeaderOutputPredefine.h"
 
 // auto generated inclusion list
-#include "mc/common/MaterialType.h"
+#include "mc/enums/MaterialType.h"
 
 class Material {
 public:

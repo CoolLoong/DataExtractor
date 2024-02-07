@@ -47,7 +47,7 @@
 //    }
 //}
 
-namespace ll::utils {
+namespace ll::memory {
 
 template <size_t len>
 struct PatchHelper {
@@ -55,9 +55,13 @@ struct PatchHelper {
     using ref_t = uchar (&)[len];
     constexpr bool operator==(ref_t ref) const noexcept { return memcmp(data, ref, sizeof data) == 0; }
     constexpr bool operator!=(ref_t ref) const noexcept { return memcmp(data, ref, sizeof data) != 0; }
-    constexpr bool operator==(PatchHelper ref) const noexcept { return memcmp(data, ref.data, sizeof data) == 0; }
-    constexpr bool operator!=(PatchHelper ref) const noexcept { return memcmp(data, ref.data, sizeof data) != 0; }
-    PatchHelper&   operator=(ref_t ref) { memcpy(data, ref, sizeof data); }
+    constexpr bool operator==(PatchHelper const& ref) const noexcept {
+        return memcmp(data, ref.data, sizeof data) == 0;
+    }
+    constexpr bool operator!=(PatchHelper const& ref) const noexcept {
+        return memcmp(data, ref.data, sizeof data) != 0;
+    }
+    PatchHelper& operator=(ref_t ref) { memcpy(data, ref, sizeof data); }
 
     bool doPatch(PatchHelper expected, PatchHelper patched) {
         if (*this == expected) {
@@ -89,4 +93,4 @@ struct NopFiller {
         return ret;
     }
 };
-} // namespace ll::utils
+} // namespace ll::memory

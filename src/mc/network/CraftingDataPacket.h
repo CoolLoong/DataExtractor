@@ -1,8 +1,8 @@
 #pragma once
 
-#include "mc/_HeaderOutputPredefine.h"
 #include "mc/common/Result.h"
-#include "mc/common/MinecraftPacketIds.h"
+#include "mc/_HeaderOutputPredefine.h"
+#include "mc/enums/MinecraftPacketIds.h"
 #include "mc/network/Packet.h"
 
 class CraftingDataPacket : public ::Packet {
