@@ -69,8 +69,8 @@ class GetCollisionShapeInterface {
 public:
     // prevent constructor by default
     GetCollisionShapeInterface& operator=(GetCollisionShapeInterface const&);
-                                GetCollisionShapeInterface(GetCollisionShapeInterface const&);
-                                GetCollisionShapeInterface();
+    GetCollisionShapeInterface(GetCollisionShapeInterface const&);
+    GetCollisionShapeInterface();
 };
 
 void dumpCreativeItemData(const ll::Logger& logger);
@@ -90,16 +90,39 @@ void extractBlock(ListTag& dest, const Block& block, const ll::Logger& logger);
 void extractData();
 
 #pragma region TOOL_FUNCTION
-inline bool    isValidPtr(void* p) { return (p >= (void*)0x10000ull) && (p < (void*)0x000F000000000000ull); }
-
-// 将 const char* const* 转换为 vector<string>
-std::vector<std::string> convertToStringVector(const char* const* arr, size_t size) {
-    std::vector<std::string> strings;
-    for (size_t i = 0; i < size; ++i) {
-        strings.push_back(arr[i]);
+#include <Windows.h>
+#include <dbghelp.h>
+#include <eh.h>
+std::atomic_bool needInit = true;
+void init() {
+    if (needInit) {
+        needInit = false;
+    } else {
+        return;
     }
-    return strings;
+    {
+        HANDLE hProcess;
+        hProcess = GetCurrentProcess();
+        SymInitialize(hProcess, NULL, TRUE);
+        SymSetOptions(SYMOPT_UNDNAME);
+    }
 }
+std::vector<std::string> symFromAddr(DWORD64 address, HANDLE hProcess = GetCurrentProcess()) {
+    init();
+    auto res = std::vector<std::string>();
+    SymEnumSymbolsForAddr(
+        hProcess,
+        address,
+        [](PSYMBOL_INFO pSymInfo, ULONG SymbolSize, PVOID UserContext) {
+            auto res = (std::vector<std::string>*)UserContext;
+            res->push_back(pSymInfo->Name);
+            return TRUE;
+        },
+        &res
+    );
+    return res;
+}
+inline bool isValidPtr(void* p) { return (p >= (void*)0x10000ull) && (p < (void*)0x000F000000000000ull); }
 
 std::vector<std::pair<void*, std::vector<std::string>>> dumpVtable(void* obj) {
     auto                                                    vtab  = *(uintptr_t**)obj;
@@ -107,13 +130,7 @@ std::vector<std::pair<void*, std::vector<std::string>>> dumpVtable(void* obj) {
     std::vector<std::pair<void*, std::vector<std::string>>> res;
     for (;; count++) {
         if (isValidPtr((void*)vtab[count])) {
-            size_t*     address = 0;
-            auto        result  = pl::symbol_provider::pl_lookup_symbol((void*)vtab[count], address);
-            std::string str     = *result;
-            if (*address != 0) {
-                const auto& array = convertToStringVector(result, *address);
-                res.push_back({(void*)vtab[count], array});
-            }
+            res.push_back({(void*)vtab[count], symFromAddr((uint64_t)(void*)vtab[count])});
         } else {
             break;
         }
