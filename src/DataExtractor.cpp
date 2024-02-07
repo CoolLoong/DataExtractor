@@ -1,3 +1,4 @@
+#pragma comment(lib, "Dbghelp.lib")
 #include "DataExtractor.h"
 
 using json = nlohmann::json;
@@ -99,6 +100,14 @@ LL_AUTO_TYPE_INSTANCE_HOOK(
     mc = this;
     origin();
     hookLogger.info("INJECT MINECRAFT INSTANCE");
+    // _sleep(10000);
+    hookLogger.info("ON DUMP VTABLE");
+    auto                   list = dumpVtable(this);
+    nlohmann::ordered_json json;
+    for (auto pair : list) {
+        json[std::to_string((unsigned long long)pair.first)] = pair.second;
+    }
+    writeNlohmannJSON("blockVtables.json", json);
 }
 
 // MinecraftCommands
@@ -122,21 +131,22 @@ LL_AUTO_TYPE_INSTANCE_HOOK(
 }
 
 // MinecraftCommands
-LL_AUTO_TYPE_INSTANCE_HOOK(BlockHooK, HookPriority::Normal, Block, "??0Block@@QEAA@GV?$not_null@PEAVBlockLegacy@@@gsl@@VCompoundTag@@AEBI@Z",
-void*,
-void* a1,
-void* a2,
-void* a3,
-void* a4) {
-    auto list = dumpVtable(this);
+LL_AUTO_TYPE_INSTANCE_HOOK(
+    BlockHook,
+    HookPriority::Normal,
+    Block,
+    "?addTag@Block@@QEAAAEAV1@AEBVHashedString@@@Z",
+    void*,
+    void* a1
+) {
+    hookLogger.info("ON DUMP VTABLE");
+    auto                   list = dumpVtable(this);
     nlohmann::ordered_json json;
-    for(auto pair :list) {
-        std::stringstream ss;
-        ss << pair.first;
-        json[ss.str()] = pair.second;
+    for (auto pair : list) {
+        json[std::to_string((unsigned long long)pair.first)] = pair.second;
     }
     writeNlohmannJSON("blockVtables.json", json);
-    return origin(a1,a2,a3,a4);
+    return origin(a1);
 }
 
 #pragma endregion HOOK
