@@ -122,110 +122,24 @@ LL_AUTO_TYPE_INSTANCE_HOOK(
 }
 
 // MinecraftCommands
-LL_AUTO_TYPE_INSTANCE_HOOK(BlockHooK, HookPriority::Normal, Block, "__gen_??1Block@@UEAA@XZ", void) {
-    dumpVtable(this);
-    return origin();
+LL_AUTO_TYPE_INSTANCE_HOOK(BlockHooK, HookPriority::Normal, Block, "??0Block@@QEAA@GV?$not_null@PEAVBlockLegacy@@@gsl@@VCompoundTag@@AEBI@Z",
+void*,
+void* a1,
+void* a2,
+void* a3,
+void* a4) {
+    auto list = dumpVtable(this);
+    nlohmann::ordered_json json;
+    for(auto pair :list) {
+        std::stringstream ss;
+        ss << pair.first;
+        json[ss.str()] = pair.second;
+    }
+    writeNlohmannJSON("blockVtables.json", json);
+    return origin(a1,a2,a3,a4);
 }
 
 #pragma endregion HOOK
-
-#pragma region TOOL_FUNCTION
-inline bool    isValidPtr(void* p) { return (p >= (void*)0x10000ull) && (p < (void*)0x000F000000000000ull); }
-
-// 将 const char* const* 转换为 vector<string>
-std::vector<std::string> convertToStringVector(const char* const* arr, size_t size) {
-    std::vector<std::string> strings;
-    for (size_t i = 0; i < size; ++i) {
-        strings.push_back(arr[i]);
-    }
-    return strings;
-}
-
-std::vector<std::pair<void*, std::vector<std::string>>> dumpVtable(void* obj) {
-    auto                                                    vtab  = *(uintptr_t**)obj;
-    int                                                     count = 0;
-    std::vector<std::pair<void*, std::vector<std::string>>> res;
-    for (;; count++) {
-        if (isValidPtr((void*)vtab[count])) {
-            size_t*     address = 0;
-            auto        result  = pl::symbol_provider::pl_lookup_symbol((void*)vtab[count], address);
-            std::string str     = *result;
-            if (*address != 0) {
-                const auto& array = convertToStringVector(result, *address);
-                res.push_back({(void*)vtab[count], array});
-            }
-        } else {
-            break;
-        }
-    }
-    return res;
-}
-
-bool folderExists(const std::string& folderName) {
-    struct stat info {};
-    if (stat(folderName.c_str(), &info) != 0) {
-        return false;
-    }
-    return info.st_mode & S_IFDIR;
-}
-
-void createFolder(const ll::Logger& logger, const std::string& folderName) {
-    if (const int result = _mkdir(folderName.c_str()); result != 0) {
-        logger.error("Failed to create folder.");
-    } else {
-        logger.info("Folder " + std::string(folderName) + " created successfully.");
-    }
-}
-
-bool gzip_compress(const std::string& original_str, std::string& str) {
-    z_stream d_stream = {nullptr};
-    if (Z_OK != deflateInit2(&d_stream, Z_BEST_COMPRESSION, Z_DEFLATED, MAX_WBITS + 16, 9, Z_DEFAULT_STRATEGY)) {
-        return false;
-    }
-    const unsigned long len = compressBound(original_str.size());
-    auto*               buf = (unsigned char*)malloc(len);
-    if (!buf) {
-        return false;
-    }
-    d_stream.next_in   = (unsigned char*)(original_str.c_str());
-    d_stream.avail_in  = original_str.size();
-    d_stream.next_out  = buf;
-    d_stream.avail_out = len;
-    deflate(&d_stream, Z_SYNC_FLUSH);
-    deflateEnd(&d_stream);
-    str.assign((char*)buf, d_stream.total_out);
-    free(buf);
-    return true;
-}
-
-void writeNBT(const std::string& fileName, const CompoundTag& tag) {
-    std::string compressed;
-    gzip_compress(tag.toBinaryNbt(false), compressed);
-    auto out = std::ofstream(fileName, std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
-    out << compressed;
-    out.close();
-}
-
-template <typename JSON_TYPE>
-void writeNlohmannJSON(const std::string& fileName, JSON_TYPE& json) {
-    auto out = std::ofstream(fileName, std::ofstream::out | std::ofstream::trunc);
-    out << json.dump(4);
-    out.close();
-}
-
-void writeJSON(const std::string& fileName, const Json::Value& json) {
-    auto out = std::ofstream(fileName, std::ofstream::out | std::ofstream::trunc);
-    out << json.toStyledString();
-    out.close();
-}
-
-std::string aabbToStr(const AABB& aabb) {
-    std::stringstream aabbStr;
-    aabbStr << aabb.min.x << "," << aabb.min.y << "," << aabb.min.z << "," << aabb.max.x << "," << aabb.max.y << ","
-            << aabb.max.z;
-    return aabbStr.str();
-}
-#pragma endregion TOOL_FUNCTION
 
 void PluginInit() {
     ll::Logger logger("dataextractor");
