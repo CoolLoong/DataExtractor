@@ -3,13 +3,13 @@
 #include "mc/_HeaderOutputPredefine.h"
 
 // auto generated inclusion list
+#include "mc/common/optional_ref.h"
 #include "mc/enums/BlockActorType.h"
 #include "mc/enums/BlockProperty.h"
 #include "mc/enums/BlockRenderLayer.h"
 #include "mc/enums/BlockSupportType.h"
 #include "mc/enums/FertilizerType.h"
 #include "mc/enums/ShapeType.h"
-#include "mc/enums/optional_ref.h"
 #include "mc/world/block/BlockLegacy.h"
 
 // auto generated forward declare list
@@ -23,13 +23,6 @@ class Block {
 public:
     using BlockStateValueType = std::variant<int, float, bool, std::string>;
     using BlockStatesType     = std::unordered_map<std::string, BlockStateValueType>;
-
-    LLNDAPI static optional_ref<Block const> tryGetFromRegistry(uint runtimeID);
-    LLNDAPI static optional_ref<Block const> tryGetFromRegistry(std::string_view name);
-    LLNDAPI static optional_ref<Block const> tryGetFromRegistry(std::string_view name, ushort legacyData);
-    LLNDAPI static optional_ref<Block const> tryGetFromRegistry(uint legacyBlockID, ushort legacyData);
-    LLNDAPI static optional_ref<Block const> tryGetFromRegistry(std::string_view name, BlockStatesType const& states);
-    LLNDAPI static optional_ref<Block const> tryGetFromRegistry(CompoundTag const& nbt);
 
     [[nodiscard]] inline std::string const& getTypeName() const { return getName().getString(); }
 

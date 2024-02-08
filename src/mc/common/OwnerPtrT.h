@@ -1,7 +1,7 @@
 #pragma once
 
+#include "mc/common/SharePtrRefTraits.h"
 #include "mc/_HeaderOutputPredefine.h"
-#include "mc/enums/SharePtrRefTraits.h"
 
 template <typename T0>
 class OwnerPtrT : public T0::OwnerStorage {

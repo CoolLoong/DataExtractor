@@ -97,7 +97,7 @@
 #include "ll/base/StdInt.h"
 #include "ll/memory/Memory.h"
 
-#include "mc/enums/optional_ref.h" // replace optional<reference_wrapper<>>
+#include "common/optional_ref.h"
 #include "mc/math/vector/Vecs.h"            // for vector types
 
 // clang-format off

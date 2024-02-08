@@ -1,9 +1,9 @@
 #pragma once
 
-#include "mc/enums/ArmorSlot.h"
+#include "mc/common/WeakPtr.h"
 #include "mc/_HeaderOutputPredefine.h"
+#include "mc/enums/ArmorSlot.h"
 #include "mc/enums/UseAnimation.h"
-#include "mc/enums/WeakPtr.h"
 
 // auto generated forward declare list
 // clang-format off

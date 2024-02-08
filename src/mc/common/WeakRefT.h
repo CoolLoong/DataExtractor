@@ -1,12 +1,12 @@
 #pragma once
 
 #include "mc/_HeaderOutputPredefine.h"
-#include "mc/enums/SharePtrRefTraits.h"
+#include "SharePtrRefTraits.h"
 
 template <typename T0>
-class StackRefResultT : public T0::StackResultStorage {
+class WeakRefT : public T0::WeakStorage {
 public:
     using StackRef = typename T0::StackRef;
-    using Base     = typename T0::StackResultStorage;
+    using Base     = typename T0::WeakStorage;
     using Base::Base;
 };

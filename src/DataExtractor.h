@@ -37,9 +37,7 @@
 #include "mc/world/Biome.h"
 #include "mc/world/BiomeRegistry.h"
 #include "mc/world/BlockPalette.h"
-#include "mc/world/BlockSource.h"
 #include "mc/world/BlockTypeRegistry.h"
-#include "mc/world/Dimension.h"
 #include "mc/world/Experiments.h"
 #include "mc/world/Level.h"
 #include "mc/world/LevelData.h"
@@ -49,6 +47,7 @@
 #include "mc/world/VanillaItemTags.h"
 #include "mc/world/block/Block.h"
 #include "mc/world/block/BlockLegacy.h"
+#include "mc/world/block/BlockSource.h"
 #include "mc/world/item/Item.h"
 #include "mc/world/item/ItemDescriptor.h"
 #include "mc/world/item/ItemInstance.h"
@@ -90,54 +89,6 @@ void extractBlock(ListTag& dest, const Block& block, const ll::Logger& logger);
 void extractData();
 
 #pragma region TOOL_FUNCTION
-#include <Windows.h>
-#include <dbghelp.h>
-#include <eh.h>
-std::atomic_bool needInit = true;
-void init() {
-    if (needInit) {
-        needInit = false;
-    } else {
-        return;
-    }
-    {
-        HANDLE hProcess;
-        hProcess = GetCurrentProcess();
-        SymInitialize(hProcess, NULL, TRUE);
-        SymSetOptions(SYMOPT_UNDNAME);
-    }
-}
-std::vector<std::string> symFromAddr(DWORD64 address, HANDLE hProcess = GetCurrentProcess()) {
-    init();
-    auto res = std::vector<std::string>();
-    SymEnumSymbolsForAddr(
-        hProcess,
-        address,
-        [](PSYMBOL_INFO pSymInfo, ULONG SymbolSize, PVOID UserContext) {
-            auto res = (std::vector<std::string>*)UserContext;
-            res->push_back(pSymInfo->Name);
-            return TRUE;
-        },
-        &res
-    );
-    return res;
-}
-inline bool isValidPtr(void* p) { return (p >= (void*)0x10000ull) && (p < (void*)0x000F000000000000ull); }
-
-std::vector<std::pair<void*, std::vector<std::string>>> dumpVtable(void* obj) {
-    auto                                                    vtab  = *(uintptr_t**)obj;
-    int                                                     count = 0;
-    std::vector<std::pair<void*, std::vector<std::string>>> res;
-    for (;; count++) {
-        if (isValidPtr((void*)vtab[count])) {
-            res.push_back({(void*)vtab[count], symFromAddr((uint64_t)(void*)vtab[count])});
-        } else {
-            break;
-        }
-    }
-    return res;
-}
-
 bool folderExists(const std::string& folderName) {
     struct stat info {};
     if (stat(folderName.c_str(), &info) != 0) {

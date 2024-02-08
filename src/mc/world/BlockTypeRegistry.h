@@ -5,10 +5,10 @@
 #include "mc/_HeaderOutputPredefine.h"
 
 // auto generated inclusion list
-#include "mc/enums/OwnerPtrT.h"
-#include "mc/enums/SharedPtr.h"
-#include "mc/enums/StackRefResultT.h"
-#include "mc/enums/WeakPtr.h"
+#include "mc/common/StackRefResultT.h"
+#include "mc/common/SharedPtr.h"
+#include "mc/common/WeakPtr.h"
+#include "mc/common/OwnerPtrT.h"
 
 class BlockTypeRegistry {
 public:

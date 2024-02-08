@@ -5,10 +5,10 @@ using json = nlohmann::json;
 using namespace std;
 
 static Minecraft*         mc                = nullptr;
-static Dimension*         overworld         = nullptr;
 static MinecraftCommands* commands          = nullptr;
 static unsigned int       blockStateCounter = 0;
 static AABB               ZERO_AABB         = AABB(Vec3(0, 0, 0), Vec3(0, 0, 0));
+static BlockSource*       blockSource       = nullptr;
 
 #pragma region HOOK
 ll::Logger     hookLogger("DataExtractor-Hook");
@@ -33,20 +33,22 @@ LL_AUTO_TYPE_INSTANCE_HOOK(
     }
 }
 
-// Dimension
 LL_AUTO_TYPE_INSTANCE_HOOK(
-    DimensionService,
+    BlockSourceService,
     ll::memory::HookPriority::Normal,
-    Dimension,
-    "?init@Dimension@@UEAAXAEBVStructureSetRegistry@worldgen@br@@@Z",
-    void*,
-    Dimension* a1
+    BlockSource,
+    "??0BlockSource@@QEAA@AEAVChunkSource@@_N1@Z",
+    BlockSource*,
+    void* a1,
+    bool a2,
+    bool a3
 ) {
-    if (a1->getHeight() > 256) {
-        hookLogger.info("INJECT DIMENSION INSTANCE");
-        overworld = a1;
+    auto* s = origin(a1,a2,a3);
+    if (blockSource==nullptr && s->getDimensionId().id==0) {
+        hookLogger.info("INJECT BLOCKSOURCE INSTANCE");
+        blockSource = s;
     }
-    return origin(a1);
+    return s;
 }
 
 // Recipe packet
@@ -100,14 +102,6 @@ LL_AUTO_TYPE_INSTANCE_HOOK(
     mc = this;
     origin();
     hookLogger.info("INJECT MINECRAFT INSTANCE");
-    // _sleep(10000);
-    hookLogger.info("ON DUMP VTABLE");
-    auto                   list = dumpVtable(this);
-    nlohmann::ordered_json json;
-    for (auto pair : list) {
-        json[std::to_string((unsigned long long)pair.first)] = pair.second;
-    }
-    writeNlohmannJSON("blockVtables.json", json);
 }
 
 // MinecraftCommands
@@ -130,25 +124,6 @@ LL_AUTO_TYPE_INSTANCE_HOOK(
     hookLogger.info("INJECT MINECRAFTCOMMANDS INSTANCE");
 }
 
-// MinecraftCommands
-LL_AUTO_TYPE_INSTANCE_HOOK(
-    BlockHook,
-    HookPriority::Normal,
-    Block,
-    "?addTag@Block@@QEAAAEAV1@AEBVHashedString@@@Z",
-    void*,
-    void* a1
-) {
-    hookLogger.info("ON DUMP VTABLE");
-    auto                   list = dumpVtable(this);
-    nlohmann::ordered_json json;
-    for (auto pair : list) {
-        json[std::to_string((unsigned long long)pair.first)] = pair.second;
-    }
-    writeNlohmannJSON("blockVtables.json", json);
-    return origin(a1);
-}
-
 #pragma endregion HOOK
 
 void PluginInit() {
@@ -157,23 +132,23 @@ void PluginInit() {
 }
 
 void extractData() {
-    // ll::Logger logger("dataextractor");
-    // logger.info("DataExtractor plugin start!");
-    // if (!folderExists("data")) {
-    //     createFolder(logger, "data");
-    // }
-    // dumpCommandNameSymbol(logger);
-    // dumpCommonCommandArgData(logger);
-    // dumpFullCommandArgData(logger);
-    // dumpCommandmConstrainedValues(logger);
-    // dumpBiomeData(logger);
-    // dumpCreativeItemData(logger);
+    ll::Logger logger("dataextractor");
+    logger.info("DataExtractor plugin start!");
+    if (!folderExists("data")) {
+        createFolder(logger, "data");
+    }
+    dumpCommandNameSymbol(logger);
+    dumpCommonCommandArgData(logger);
+    dumpFullCommandArgData(logger);
+    dumpCommandmConstrainedValues(logger);
+    dumpBiomeData(logger);
+    dumpCreativeItemData(logger);
     // dumpBlockAttributesData(logger);
     // dumpItemData(logger);
-    // dumpPalette(logger);
+    dumpPalette(logger);
     // dumpBlockTags(logger);
     // dumpItemTags(logger);
-    // dumpPropertyTypeData(logger);
+    dumpPropertyTypeData(logger);
 }
 
 void dumpCreativeItemData(const ll::Logger& logger) {
@@ -232,34 +207,33 @@ void extractBlock(ListTag& dest, const Block& block, const ll::Logger& logger) {
         nbt.putInt("burnAbility", block.getBurnOdds());
         nbt.putInt("lightDampening", block.getLight().value);
         nbt.putInt("lightEmission", block.getLightEmission().value);
-        mce::Color color    = block.getMapColor(overworld->getBlockSourceFromMainChunkSource(), BlockPos(0, 10, 0));
-        auto       colornbt = CompoundTag();
-        colornbt.putInt("r", static_cast<int>(color.r * 255));
-        colornbt.putInt("g", static_cast<int>(color.g * 255));
-        colornbt.putInt("b", static_cast<int>(color.b * 255));
-        colornbt.putInt("a", static_cast<int>(color.a * 255));
-        colornbt.putString("hexString", color.toHexString());
+        int  color    = block.getColor();
+        auto colornbt = CompoundTag();
+        colornbt.putInt("r", (color >> 24) & 0xFF);
+        colornbt.putInt("g", (color >> 16) & 0xFF);
+        colornbt.putInt("b", (color >> 8) & 0xFF);
+        colornbt.putInt("a", color & 0xFF);
         nbt.putCompound("color", colornbt);
-        auto tmp = AABB(0, 0, 0, 0, 0, 0);
+        /*auto tmp = AABB(0, 0, 0, 0, 0, 0);
         block.getCollisionShapeForCamera(
             tmp,
-            *reinterpret_cast<IConstBlockSource*>(&overworld->getBlockSourceFromMainChunkSource()),
-            BlockPos(0, 0, 0)
+            *reinterpret_cast<IConstBlockSource*>(&blockSource),
+            BlockPos(0, 100, 0)
         );
         nbt.putString("aabbVisual", aabbToStr(tmp));
         auto                                           tmp2 = AABB(0, 0, 0, 0, 0, 0);
         optional_ref<GetCollisionShapeInterface const> nullRef{};
         block.getCollisionShape(
             tmp2,
-            *reinterpret_cast<IConstBlockSource*>(&overworld->getBlockSourceFromMainChunkSource()),
-            BlockPos(0, 0, 0),
+            *reinterpret_cast<IConstBlockSource*>(&blockSource),
+            BlockPos(0, 100, 0),
             nullRef
         );
         nbt.putString("aabbCollision", aabbToStr(tmp2));
-        nbt.putBoolean("hasCollision", tmp2 != ZERO_AABB);
+        nbt.putBoolean("hasCollision", tmp2 != ZERO_AABB);*/
         nbt.putBoolean("hasBlockEntity", block.getBlockEntityType() != BlockActorType::Undefined);
         nbt.putBoolean("isAir", block.isAir());
-        nbt.putBoolean("isBounceBlock", block.isAir());
+        nbt.putBoolean("isBounceBlock", block.isBounceBlock());
         nbt.putBoolean("isButtonBlock", block.isButtonBlock());
         nbt.putBoolean("isCropBlock", block.isCropBlock());
         nbt.putBoolean("isDoorBlock", block.isDoorBlock());
@@ -360,7 +334,8 @@ void extractItem(ListTag& dest, const Item& item, const ll::Logger& logger) {
     nbt.putInt("toughnessValue", item.getToughnessValue());
     nbt.putFloat("viewDamping", item.getViewDamping());
     nbt.putInt("cooldownTime", item.getCooldownTime());
-    nbt.putString("cooldownType", item.getCooldownType().getString());
+    // const string& cooldownType = item.getCooldownType().str;
+    // nbt.putString("cooldownType", cooldownType);
     nbt.putInt("maxStackSize", item.getMaxStackSize(item.buildDescriptor(0, nullptr)));
     CompoundTag           descriptionId;
     std::set<std::string> uniqueStr;

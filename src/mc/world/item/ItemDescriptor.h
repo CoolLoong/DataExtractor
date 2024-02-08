@@ -4,7 +4,7 @@
 #include "mc/world/item/ItemTag.h"
 
 // auto generated inclusion list
-#include "mc/enums/WeakPtr.h"
+#include "mc/common/WeakPtr.h"
 
 // auto generated forward declare list
 // clang-format off

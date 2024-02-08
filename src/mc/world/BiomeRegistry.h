@@ -1,8 +1,8 @@
 #pragma once
 
+#include "mc/common/IDType.h"
 #include "mc/_HeaderOutputPredefine.h"
-#include "mc/enums/IDType.h"
-#include "mc/enums/TagRegistry.h"
+#include "mc/common/TagRegistry.h"
 #include "mc/enums/VanillaBiomeTypes.h"
 
 // auto generated forward declare list
