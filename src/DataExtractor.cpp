@@ -143,8 +143,8 @@ void extractData() {
     dumpCommandmConstrainedValues(logger);
     dumpBiomeData(logger);
     dumpCreativeItemData(logger);
-    // dumpBlockAttributesData(logger);
-    // dumpItemData(logger);
+    dumpBlockAttributesData(logger);
+    dumpItemData(logger);
     dumpPalette(logger);
     // dumpBlockTags(logger);
     // dumpItemTags(logger);
@@ -312,45 +312,45 @@ void extractItem(ListTag& dest, const Item& item, const ll::Logger& logger) {
     nbt.putBoolean("isComponentBased", item.isComponentBased());
     nbt.putString("name", item.getFullItemName());
     nbt.putShort("maxDamage", item.getMaxDamage());
-    nbt.putBoolean("isArmor", item.isArmor());
-    nbt.putBoolean("isBlockPlanterItem", item.isBlockPlanterItem());
-    nbt.putBoolean("isDamageable", item.isDamageable());
-    nbt.putBoolean("isDye", item.isDye());
-    nbt.putString("itemColorName", ItemColorUtil::getName(item.getItemColor()));
-    nbt.putInt("itemColorRGB", ItemColorUtil::getRGBColor(item.getItemColor()));
-    nbt.putBoolean("isFertilizer", item.isFertilizer());
-    nbt.putBoolean("isThrowable", item.isThrowable());
-    nbt.putBoolean("isFood", item.isFood());
-    nbt.putBoolean("isUseable", item.isUseable());
-    nbt.putBoolean("isElytra", item.isElytra());
-    nbt.putBoolean("canBeDepleted", item.canBeDepleted());
-    nbt.putBoolean("canDestroyInCreative", item.canDestroyInCreative());
-    nbt.putBoolean("canUseOnSimTick", item.canUseOnSimTick());
-    nbt.putBoolean("canBeCharged", item.canBeCharged());
-    nbt.putString("creativeGroup", item.getCreativeGroup());
-    nbt.putInt("creativeCategory", static_cast<int>(item.getCreativeCategory()));
-    nbt.putInt("armorValue", item.getArmorValue());
-    nbt.putInt("attackDamage", item.getAttackDamage());
-    nbt.putInt("toughnessValue", item.getToughnessValue());
-    nbt.putFloat("viewDamping", item.getViewDamping());
-    nbt.putInt("cooldownTime", item.getCooldownTime());
+    // nbt.putBoolean("isArmor", item.isArmor());
+    // nbt.putBoolean("isBlockPlanterItem", item.isBlockPlanterItem());
+    // nbt.putBoolean("isDamageable", item.isDamageable());
+    // nbt.putBoolean("isDye", item.isDye());
+    // nbt.putString("itemColorName", ItemColorUtil::getName(item.getItemColor()));
+    // nbt.putInt("itemColorRGB", ItemColorUtil::getRGBColor(item.getItemColor()));
+    // nbt.putBoolean("isFertilizer", item.isFertilizer());
+    // nbt.putBoolean("isThrowable", item.isThrowable());
+    // nbt.putBoolean("isFood", item.isFood());
+    // nbt.putBoolean("isUseable", item.isUseable());
+    // nbt.putBoolean("isElytra", item.isElytra());
+    // nbt.putBoolean("canBeDepleted", item.canBeDepleted());
+    // nbt.putBoolean("canDestroyInCreative", item.canDestroyInCreative());
+    // nbt.putBoolean("canUseOnSimTick", item.canUseOnSimTick());
+    // nbt.putBoolean("canBeCharged", item.canBeCharged());
+    // nbt.putString("creativeGroup", item.getCreativeGroup());
+    // nbt.putInt("creativeCategory", static_cast<int>(item.getCreativeCategory()));
+    // nbt.putInt("armorValue", item.getArmorValue());
+    // nbt.putInt("attackDamage", item.getAttackDamage());
+    // nbt.putInt("toughnessValue", item.getToughnessValue());
+    // nbt.putFloat("viewDamping", item.getViewDamping());
+    // nbt.putInt("cooldownTime", item.getCooldownTime());
     // const string& cooldownType = item.getCooldownType().str;
     // nbt.putString("cooldownType", cooldownType);
-    nbt.putInt("maxStackSize", item.getMaxStackSize(item.buildDescriptor(0, nullptr)));
-    CompoundTag           descriptionId;
-    std::set<std::string> uniqueStr;
-    for (int i = 0; i <= 256; ++i) {
-        try {
-            if (item.isValidAuxValue(i)) {
-                const auto itemstack = ItemStack(item, 1, i); // ignore some invaild aux exception
-                if (!uniqueStr.contains(itemstack.getDescriptionId())) {
-                    uniqueStr.insert(itemstack.getDescriptionId());
-                    descriptionId.putString(std::to_string(i), itemstack.getDescriptionId());
-                }
-            }
-        } catch (...) {}
-    }
-    nbt.putCompound("descriptionId", descriptionId);
+    // nbt.putInt("maxStackSize", item.getMaxStackSize(item.buildDescriptor(0, nullptr)));
+    // CompoundTag           descriptionId;
+    // std::set<std::string> uniqueStr;
+    // for (int i = 0; i <= 256; ++i) {
+        // try {
+            // if (item.isValidAuxValue(i)) {
+                // const auto itemstack = ItemStack(item, 1, i); // ignore some invaild aux exception
+                // if (!uniqueStr.contains(itemstack.getDescriptionId())) {
+                    // uniqueStr.insert(itemstack.getDescriptionId());
+                    // descriptionId.putString(std::to_string(i), itemstack.getDescriptionId());
+                // }
+            // }
+        // } catch (...) {}
+    // }
+    // nbt.putCompound("descriptionId", descriptionId);
     dest.add(nbt);
 }
 
